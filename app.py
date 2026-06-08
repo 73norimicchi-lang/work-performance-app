@@ -105,6 +105,8 @@ with tab1:
             color_continuous_scale="RdYlGn",
             labels={"通し歩留まり_avg": "通し歩留まり"},
         )
+        # バーに%表示の数値ラベルを付ける
+        fig1.update_traces(texttemplate="%{x:.1%}", textposition="outside")
         fig1.update_layout(xaxis_tickformat=".1%", coloraxis_showscale=False)
         st.plotly_chart(fig1, use_container_width=True)
 
@@ -122,6 +124,8 @@ with tab1:
             y=agg["スタートロス_avg"],
             marker_color="#FFA15A",
         ))
+        # バーに数値ラベル（分）を付ける
+        fig2.update_traces(texttemplate="%{y:.1f}", textposition="outside")
         fig2.update_layout(
             title="調整員別 段取りロス・スタートロス（平均）",
             barmode="group",
@@ -186,6 +190,8 @@ with tab2:
             color_continuous_scale="RdYlGn",
             labels={"通し歩留まり_avg": "通し歩留まり"},
         )
+        # バーに%表示の数値ラベルを付ける
+        fig4.update_traces(texttemplate="%{x:.1%}", textposition="outside")
         fig4.update_layout(xaxis_tickformat=".1%", coloraxis_showscale=False)
         st.plotly_chart(fig4, use_container_width=True)
 
@@ -200,6 +206,8 @@ with tab2:
             color_continuous_scale="RdYlGn",
             labels={"歩留まり_avg": "歩留まり"},
         )
+        # バーに%表示の数値ラベルを付ける
+        fig5.update_traces(texttemplate="%{x:.1%}", textposition="outside")
         fig5.update_layout(xaxis_tickformat=".1%", coloraxis_showscale=False)
         st.plotly_chart(fig5, use_container_width=True)
 
