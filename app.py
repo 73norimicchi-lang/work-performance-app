@@ -92,46 +92,43 @@ with tab1:
         件数=("作業日", "count"),
     ).reset_index()
 
-    col1, col2 = st.columns(2)
+    # 縦棒グラフ：調整員別 通し歩留まり
+    fig1 = px.bar(
+        agg.sort_values("通し歩留まり_avg", ascending=False),
+        x="調整員",
+        y="通し歩留まり_avg",
+        title="調整員別 通し歩留まり（平均）",
+        color="通し歩留まり_avg",
+        color_continuous_scale="RdYlGn",
+        labels={"通し歩留まり_avg": "通し歩留まり"},
+    )
+    # バーに%表示の数値ラベルを付ける
+    fig1.update_traces(texttemplate="%{y:.1%}", textposition="outside")
+    fig1.update_layout(yaxis_tickformat=".1%", coloraxis_showscale=False)
+    st.plotly_chart(fig1, use_container_width=True)
 
-    with col1:
-        fig1 = px.bar(
-            agg.sort_values("通し歩留まり_avg"),
-            x="通し歩留まり_avg",
-            y="調整員",
-            orientation="h",
-            title="調整員別 通し歩留まり（平均）",
-            color="通し歩留まり_avg",
-            color_continuous_scale="RdYlGn",
-            labels={"通し歩留まり_avg": "通し歩留まり"},
-        )
-        # バーに%表示の数値ラベルを付ける
-        fig1.update_traces(texttemplate="%{x:.1%}", textposition="outside")
-        fig1.update_layout(xaxis_tickformat=".1%", coloraxis_showscale=False)
-        st.plotly_chart(fig1, use_container_width=True)
-
-    with col2:
-        fig2 = go.Figure()
-        fig2.add_trace(go.Bar(
-            name="段取りロス",
-            x=agg["調整員"],
-            y=agg["段取りロス_avg"],
-            marker_color="#EF553B",
-        ))
-        fig2.add_trace(go.Bar(
-            name="スタートロス",
-            x=agg["調整員"],
-            y=agg["スタートロス_avg"],
-            marker_color="#FFA15A",
-        ))
-        # バーに数値ラベル（分）を付ける
-        fig2.update_traces(texttemplate="%{y:.1f}", textposition="outside")
-        fig2.update_layout(
-            title="調整員別 段取りロス・スタートロス（平均）",
-            barmode="group",
-            yaxis_title="m",
-        )
-        st.plotly_chart(fig2, use_container_width=True)
+    # 縦棒グラフ：調整員別 段取りロス・スタートロス
+    fig2 = go.Figure()
+    fig2.add_trace(go.Bar(
+        name="段取りロス",
+        x=agg["調整員"],
+        y=agg["段取りロス_avg"],
+        marker_color="#EF553B",
+    ))
+    fig2.add_trace(go.Bar(
+        name="スタートロス",
+        x=agg["調整員"],
+        y=agg["スタートロス_avg"],
+        marker_color="#FFA15A",
+    ))
+    # バーに数値ラベル（m）を付ける
+    fig2.update_traces(texttemplate="%{y:.1f}", textposition="outside")
+    fig2.update_layout(
+        title="調整員別 段取りロス・スタートロス（平均）",
+        barmode="group",
+        yaxis_title="m",
+    )
+    st.plotly_chart(fig2, use_container_width=True)
 
     # 日別推移
     st.subheader("日別 通し歩留まり推移")
@@ -177,39 +174,35 @@ with tab2:
         件数=("作業日", "count"),
     ).reset_index()
 
-    col1, col2 = st.columns(2)
+    fig4 = px.bar(
+        agg2.sort_values("通し歩留まり_avg"),
+        x="通し歩留まり_avg",
+        y="集積者",
+        orientation="h",
+        title="集積者別 通し歩留まり（平均）",
+        color="通し歩留まり_avg",
+        color_continuous_scale="RdYlGn",
+        labels={"通し歩留まり_avg": "通し歩留まり"},
+    )
+    # バーに%表示の数値ラベルを付ける
+    fig4.update_traces(texttemplate="%{x:.1%}", textposition="outside")
+    fig4.update_layout(xaxis_tickformat=".1%", coloraxis_showscale=False)
+    st.plotly_chart(fig4, use_container_width=True)
 
-    with col1:
-        fig4 = px.bar(
-            agg2.sort_values("通し歩留まり_avg"),
-            x="通し歩留まり_avg",
-            y="集積者",
-            orientation="h",
-            title="集積者別 通し歩留まり（平均）",
-            color="通し歩留まり_avg",
-            color_continuous_scale="RdYlGn",
-            labels={"通し歩留まり_avg": "通し歩留まり"},
-        )
-        # バーに%表示の数値ラベルを付ける
-        fig4.update_traces(texttemplate="%{x:.1%}", textposition="outside")
-        fig4.update_layout(xaxis_tickformat=".1%", coloraxis_showscale=False)
-        st.plotly_chart(fig4, use_container_width=True)
-
-    with col2:
-        fig5 = px.bar(
-            agg2.sort_values("歩留まり_avg"),
-            x="歩留まり_avg",
-            y="集積者",
-            orientation="h",
-            title="集積者別 歩留まり（平均）",
-            color="歩留まり_avg",
-            color_continuous_scale="RdYlGn",
-            labels={"歩留まり_avg": "歩留まり"},
-        )
-        # バーに%表示の数値ラベルを付ける
-        fig5.update_traces(texttemplate="%{x:.1%}", textposition="outside")
-        fig5.update_layout(xaxis_tickformat=".1%", coloraxis_showscale=False)
-        st.plotly_chart(fig5, use_container_width=True)
+    fig5 = px.bar(
+        agg2.sort_values("歩留まり_avg"),
+        x="歩留まり_avg",
+        y="集積者",
+        orientation="h",
+        title="集積者別 歩留まり（平均）",
+        color="歩留まり_avg",
+        color_continuous_scale="RdYlGn",
+        labels={"歩留まり_avg": "歩留まり"},
+    )
+    # バーに%表示の数値ラベルを付ける
+    fig5.update_traces(texttemplate="%{x:.1%}", textposition="outside")
+    fig5.update_layout(xaxis_tickformat=".1%", coloraxis_showscale=False)
+    st.plotly_chart(fig5, use_container_width=True)
 
     st.subheader("集計テーブル")
     tbl2 = agg2.copy()
