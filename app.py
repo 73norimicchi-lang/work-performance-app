@@ -129,7 +129,7 @@ with tab1:
         fig2.update_layout(
             title="調整員別 段取りロス・スタートロス（平均）",
             barmode="group",
-            yaxis_title="分",
+            yaxis_title="m",
         )
         st.plotly_chart(fig2, use_container_width=True)
 
@@ -157,14 +157,14 @@ with tab1:
     tbl = agg.copy()
     tbl["通し歩留まり"] = tbl["通し歩留まり_avg"].map("{:.1%}".format)
     tbl["歩留まり"] = tbl["歩留まり_avg"].map("{:.1%}".format)
-    tbl["段取りロス(分)"] = tbl["段取りロス_avg"].apply(
+    tbl["段取りロス(m)"] = tbl["段取りロス_avg"].apply(
         lambda x: f"{x:.1f}" if pd.notna(x) else "-"
     )
-    tbl["スタートロス(分)"] = tbl["スタートロス_avg"].apply(
+    tbl["スタートロス(m)"] = tbl["スタートロス_avg"].apply(
         lambda x: f"{x:.1f}" if pd.notna(x) else "-"
     )
     st.dataframe(
-        tbl[["調整員", "通し歩留まり", "歩留まり", "段取りロス(分)", "スタートロス(分)", "件数"]],
+        tbl[["調整員", "通し歩留まり", "歩留まり", "段取りロス(m)", "スタートロス(m)", "件数"]],
         use_container_width=True,
         hide_index=True,
     )
