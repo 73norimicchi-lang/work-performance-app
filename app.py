@@ -11,6 +11,13 @@ st.set_page_config(
 
 st.title("📊 三方作業実績分析")
 
+# ロス内訳の項目（ExcelのAF〜AR列）
+LOSS_COLS = [
+    "段取りロス", "スタートロス", "製品巾", "シール強度", "シャー刃",
+    "ノッチ不良", "パンチ不良", "チャック不具合", "ツブシ割れ",
+    "柄ズレ", "耳巻き起因", "外観不良", "その他",
+]
+
 
 @st.cache_data
 def load_data(file):
@@ -23,11 +30,11 @@ def load_data(file):
         df["作業日"].astype(float), unit="D"
     )
     # 数値列を変換
+    # ロス内訳（LOSS_COLS）もまとめて数値変換する
     numeric_cols = [
         "歩留り", "通し歩留り", "投入m", "実投入m", "仕上がりm",
-        "仕上がり枚数", "自部門ロスm", "他部門ロスm", "段取りロス", "スタートロス",
-        "スタート回数",
-    ]
+        "仕上がり枚数", "自部門ロスm", "他部門ロスm", "スタート回数",
+    ] + LOSS_COLS
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -79,7 +86,9 @@ if filtered_df.empty:
     st.stop()
 
 # ========== タブ ==========
-tab1, tab2, tab3 = st.tabs(["📈 調整員別集計", "📦 集積者別集計", "📋 詳細データ"])
+tab1, tab2, tab3, tab4 = st.tabs(
+    ["📈 調整員別集計", "📦 集積者別集計", "🔧 ロス内訳", "📋 詳細データ"]
+)
 
 # ========== 調整員別集計 ==========
 with tab1:
@@ -218,8 +227,44 @@ with tab2:
         hide_index=True,
     )
 
-# ========== 詳細データ ==========
+# ========== ロス内訳 ==========
 with tab3:
+    loss_cols = [c for c in LOSS_COLS if c in filtered_df.columns]
+    # 調整員ごとにロス項目を合計
+    loss_agg = filtered_df.groupby("調整員")[loss_cols].sum().reset_index()
+
+    # 調整員別 ロス内訳（積み上げ縦棒）
+    loss_melt = loss_agg.melt(id_vars="調整員", var_name="ロス項目", value_name="ロスm")
+    fig6 = px.bar(
+        loss_melt,
+        x="調整員",
+        y="ロスm",
+        color="ロス項目",
+        title="調整員別 ロス内訳（合計m・積み上げ）",
+    )
+    fig6.update_layout(yaxis_title="m")
+    st.plotly_chart(fig6, use_container_width=True)
+
+    # ロス項目別 合計（全体・横棒、数値ラベル付き）
+    loss_total = filtered_df[loss_cols].sum().sort_values()
+    fig7 = px.bar(
+        x=loss_total.values,
+        y=loss_total.index,
+        orientation="h",
+        title="ロス項目別 合計（全体）",
+        labels={"x": "m", "y": "ロス項目"},
+    )
+    fig7.update_traces(texttemplate="%{x:.0f}", textposition="outside")
+    st.plotly_chart(fig7, use_container_width=True)
+
+    # 集計テーブル（調整員 × ロス項目）
+    st.subheader("集計テーブル（合計m）")
+    tbl3 = loss_agg.copy()
+    tbl3["合計"] = tbl3[loss_cols].sum(axis=1)
+    st.dataframe(tbl3, use_container_width=True, hide_index=True)
+
+# ========== 詳細データ ==========
+with tab4:
     display_cols = [
         "作業日", "作業号機", "調整員", "集積者", "製袋形態",
         "投入m", "仕上がりm", "歩留り", "通し歩留り", "段取りロス", "スタートロス",
