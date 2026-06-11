@@ -26,6 +26,7 @@ def load_data(file):
     numeric_cols = [
         "歩留り", "通し歩留り", "投入m", "実投入m", "仕上がりm",
         "仕上がり枚数", "自部門ロスm", "他部門ロスm", "段取りロス", "スタートロス",
+        "スタート回数",
     ]
     for col in numeric_cols:
         if col in df.columns:
@@ -86,11 +87,14 @@ with tab1:
         通し歩留まり_avg=("通し歩留り", "mean"),
         歩留まり_avg=("歩留り", "mean"),
         段取りロス_avg=("段取りロス", "mean"),
-        スタートロス_avg=("スタートロス", "mean"),
+        スタートロス_sum=("スタートロス", "sum"),
+        スタート回数_sum=("スタート回数", "sum"),
         投入m_sum=("投入m", "sum"),
         仕上がりm_sum=("仕上がりm", "sum"),
         件数=("作業日", "count"),
     ).reset_index()
+    # スタートロスの平均 = スタートロス合計 ÷ スタート回数合計（1回あたりm、0除算回避）
+    agg["スタートロス_avg"] = agg["スタートロス_sum"] / agg["スタート回数_sum"].replace(0, pd.NA)
 
     # 縦棒グラフ：調整員別 通し歩留まり
     fig1 = px.bar(
@@ -116,7 +120,7 @@ with tab1:
         marker_color="#EF553B",
     ))
     fig2.add_trace(go.Bar(
-        name="スタートロス",
+        name="スタートロス(/回)",
         x=agg["調整員"],
         y=agg["スタートロス_avg"],
         marker_color="#FFA15A",
@@ -157,11 +161,11 @@ with tab1:
     tbl["段取りロス(m)"] = tbl["段取りロス_avg"].apply(
         lambda x: f"{x:.1f}" if pd.notna(x) else "-"
     )
-    tbl["スタートロス(m)"] = tbl["スタートロス_avg"].apply(
+    tbl["スタートロス(m/回)"] = tbl["スタートロス_avg"].apply(
         lambda x: f"{x:.1f}" if pd.notna(x) else "-"
     )
     st.dataframe(
-        tbl[["調整員", "通し歩留まり", "歩留まり", "段取りロス(m)", "スタートロス(m)", "件数"]],
+        tbl[["調整員", "通し歩留まり", "歩留まり", "段取りロス(m)", "スタートロス(m/回)", "件数"]],
         use_container_width=True,
         hide_index=True,
     )
